@@ -3160,22 +3160,6 @@ var THREE = _interopRequireWildcard(_three);
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
-// const express = require('express');
-// const app = express();
-// app.use('*', (req, res) => {
-//   res.sendFile(path.join(__dirname, '..', './index.html'));
-// });
-
-// const PORT = 8000;
-
-// const startListening = () => {
-//   // start listening (and create a 'server' object representing our server)
-//   const server = app.listen(PORT, () => console.log(`Listening on ${PORT}`));
-
-//   // set up our socket control center
-//   // const io = socketio(server);
-//   // require('./socket')(io);
-// };
 // const Detector = require('../tools/Detector');
 
 // if (Detector.webgl) {
@@ -3186,55 +3170,155 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 //   document.getElementById('container').appendChild(warning);
 // }
 
+var state = {
+  // scene,
+  // camera,
+  // renderer,
+  // cube,
+  // loader,
+  // title,
+  // lines,
+  view: 0
+};
 
-// SPINNING CUBE 
+var init = function init() {
+  generateSceneDefaults();
 
-// const scene = new THREE.Scene();
-// const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+  setViewForCube();
 
-// const renderer = new THREE.WebGLRenderer();
-// renderer.setSize(window.innerWidth * .9, window.innerHeight * .9);
-// document.body.appendChild(renderer.domElement);
+  animate();
+};
 
-// const geometry = new THREE.BoxGeometry(1, 1, 1);
-// const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-// const cube = new THREE.Mesh(geometry, material);
-// scene.add(cube);
+var generateSceneDefaults = function generateSceneDefaults() {
 
-// camera.position.z = 5;
+  state.scene = new THREE.Scene();
+  console.log(state);
+  state.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
-// function animate() {
-//   requestAnimationFrame(animate);
+  state.renderer = new THREE.WebGLRenderer({ antialias: true });
+  state.renderer.setSize(window.innerWidth * .9, window.innerHeight * .9);
+  document.body.appendChild(state.renderer.domElement);
 
+  state.loader = new THREE.FontLoader();
+
+  document.addEventListener('mousedown', switchView, false);
+  document.addEventListener('keypress', rotateCube, false);
+  document.addEventListener('touchstart', rotateCube, false);
+  document.addEventListener('touchmove', rotateCube, false);
+  document.addEventListener('keydown', rotateCube, false);
+};
+
+var rotateCube = function rotateCube() {
+  state.cube.rotation.x += 0.1;
+  state.cube.rotation.y += 0.1;
+};
+
+var switchView = function switchView() {
+  state.view++;
+  if (state.view > 2) state.view = 0;
+  if (state.view === 0) {
+    setViewForCube();
+  } else if (state.view === 1) {
+    setViewForLines();
+  } else if (state.view === 2) {
+    setViewForText();
+  }
+};
+
+var createCube = function createCube() {
+  var geometry = new THREE.BoxGeometry(1, 1, 1);
+  var material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+  return new THREE.Mesh(geometry, material);
+};
+
+var setViewForCube = function setViewForCube() {
+  state.scene = new THREE.Scene();
+  state.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+  state.cube = createCube();
+  state.scene.add(state.cube);
+  state.camera.position.z = 5;
+};
+
+var createLines = function createLines() {
+
+  var material = new THREE.LineBasicMaterial({ color: 0x0000ff });
+
+  var geometry = new THREE.Geometry();
+  geometry.vertices.push(new THREE.Vector3(-10, 0, 0));
+  geometry.vertices.push(new THREE.Vector3(0, 10, 0));
+  geometry.vertices.push(new THREE.Vector3(10, 0, 0));
+
+  return new THREE.Line(geometry, material);
+};
+
+var setViewForLines = function setViewForLines() {
+  state.scene = new THREE.Scene();
+
+  state.lines = createLines();
+  state.scene.add(state.lines);
+
+  state.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 500);
+  state.camera.position.set(0, 0, 100);
+  state.camera.lookAt(new THREE.Vector3(0, 0, 0));
+};
+
+var createText = function createText(text) {
+  return state.loader.load('fonts/helvetiker_regular.typeface.json', function (font) {
+
+    return new THREE.TextGeometry('' + text, {
+      font: font,
+      size: 80,
+      height: 5,
+      curveSegments: 12,
+      bevelEnabled: true,
+      bevelThickness: 10,
+      bevelSize: 8,
+      bevelSegments: 5
+    });
+  });
+};
+
+var setViewForText = function setViewForText(text) {
+  state.scene = new THREE.Scene();
+  state.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+  state.title = createText(text);
+  state.scene.add(state.title);
+  state.camera.position.z = 5;
+};
+
+//SPINNING CUBE 
+
+var animate = function animate() {
+  requestAnimationFrame(animate);
+
+  // cube.rotation.x += 0.1;
+  // cube.rotation.y += 0.1;
+
+  state.renderer.render(state.scene, state.camera);
+};
+
+init();
+
+// document.addEventListener('mousedown', onDocumentMouseDown, false);
+// document.addEventListener('keypress', onDocumentKeyPress, false);
+// document.addEventListener('touchstart', onDocumentTouchStart, false);
+
+// document.addEventListener('touchmove', onDocumentTouchMove, false);
+
+
+// document.addEventListener('keydown', onDocumentKeyDown, false);
+
+
+// function onDocumentMouseDown() {
 //   cube.rotation.x += 0.1;
 //   cube.rotation.y += 0.1;
-
-//   renderer.render(scene, camera);
 // }
-// animate();
 
-var renderer = new THREE.WebGLRenderer();
-renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(renderer.domElement);
 
-var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 500);
-camera.position.set(0, 0, 100);
-camera.lookAt(new THREE.Vector3(0, 0, 0));
-
-var scene = new THREE.Scene();
-
-//create a blue LineBasicMaterial
-var material = new THREE.LineBasicMaterial({ color: 0x0000ff });
-
-var geometry = new THREE.Geometry();
-geometry.vertices.push(new THREE.Vector3(-10, 0, 0));
-geometry.vertices.push(new THREE.Vector3(0, 10, 0));
-geometry.vertices.push(new THREE.Vector3(10, 0, 0));
-
-var line = new THREE.Line(geometry, material);
-
-scene.add(line);
-renderer.render(scene, camera);
+// function onDocumentKeyPress() {
+//   cube.rotation.x += 0.1;
+//   cube.rotation.y += 0.1;
+// }
 
 /***/ })
 /******/ ]);
