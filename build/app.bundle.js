@@ -3198,6 +3198,7 @@ var generateSceneDefaults = function generateSceneDefaults() {
   state.renderer = new THREE.WebGLRenderer({ antialias: true });
   state.renderer.setSize(window.innerWidth * .9, window.innerHeight * .9);
   document.body.appendChild(state.renderer.domElement);
+  createLights();
 
   state.loader = new THREE.FontLoader();
 
@@ -3223,6 +3224,21 @@ var switchView = function switchView() {
   } else if (state.view === 2) {
     setViewForText();
   }
+  createLights();
+};
+
+var createLights = function createLights() {
+  var dirLight = new THREE.DirectionalLight(0xffffff, 0.125);
+
+  dirLight.position.set(0, 0, 1).normalize();
+
+  state.scene.add(dirLight);
+
+  var pointLight = new THREE.PointLight(0xffffff, 1.5);
+
+  pointLight.position.set(0, 100, 90);
+
+  state.scene.add(pointLight);
 };
 
 var createCube = function createCube() {
@@ -3263,7 +3279,7 @@ var setViewForLines = function setViewForLines() {
 };
 
 var createText = function createText(text) {
-  return state.loader.load('fonts/helvetiker_regular.typeface.json', function (font) {
+  return state.loader.load('../fonts/helvetiker_regular.typeface.json', function (font) {
 
     return new THREE.TextGeometry('' + text, {
       font: font,

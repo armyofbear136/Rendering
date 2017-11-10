@@ -39,6 +39,7 @@ const generateSceneDefaults = () => {
   state.renderer = new THREE.WebGLRenderer({ antialias: true });
   state.renderer.setSize(window.innerWidth * .9, window.innerHeight * .9);
   document.body.appendChild(state.renderer.domElement);
+  createLights();
 
   state.loader = new THREE.FontLoader();
 
@@ -58,16 +59,33 @@ const rotateCube = () => {
 
 const switchView = () => {
   state.view++;
-  if (state.view > 2) state.view = 0; 
-  if (state.view === 0){
+  if (state.view > 2) state.view = 0;
+  if (state.view === 0) {
     setViewForCube();
   }
-  else if (state.view === 1){
+  else if (state.view === 1) {
     setViewForLines();
   }
-  else if (state.view === 2){
+  else if (state.view === 2) {
     setViewForText();
   }
+  createLights();
+}
+
+const createLights = () => {
+  const dirLight = new THREE.DirectionalLight(0xffffff, 0.125);
+
+  dirLight.position.set(0, 0, 1).normalize();
+
+  state.scene.add(dirLight);
+
+
+
+  const pointLight = new THREE.PointLight(0xffffff, 1.5);
+
+  pointLight.position.set(0, 100, 90);
+
+  state.scene.add(pointLight);
 }
 
 
@@ -78,8 +96,8 @@ const createCube = () => {
 }
 
 const setViewForCube = () => {
-  state.scene = new THREE.Scene();  
-  state.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);  
+  state.scene = new THREE.Scene();
+  state.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
   state.cube = createCube();
   state.scene.add(state.cube);
   state.camera.position.z = 5;
@@ -87,7 +105,7 @@ const setViewForCube = () => {
 
 const createLines = () => {
 
-  
+
   const material = new THREE.LineBasicMaterial({ color: 0x0000ff });
 
   const geometry = new THREE.Geometry();
@@ -100,8 +118,8 @@ const createLines = () => {
 }
 
 const setViewForLines = () => {
-  state.scene = new THREE.Scene();  
-  
+  state.scene = new THREE.Scene();
+
   state.lines = createLines();
   state.scene.add(state.lines);
 
@@ -112,7 +130,7 @@ const setViewForLines = () => {
 
 
 const createText = (text) => {
-  return state.loader.load('fonts/helvetiker_regular.typeface.json', function (font) {
+  return state.loader.load('../fonts/helvetiker_regular.typeface.json', function (font) {
 
     return new THREE.TextGeometry(`${text}`, {
       font: font,
@@ -129,11 +147,11 @@ const createText = (text) => {
 
 const setViewForText = (text) => {
   state.scene = new THREE.Scene();
-  state.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);    
+  state.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
   state.title = createText(text);
   state.scene.add(state.title);
   state.camera.position.z = 5;
-  
+
 }
 
 //SPINNING CUBE 
