@@ -18,6 +18,7 @@ let state = {
   // loader,
   // title,
   // lines,
+  materials: [],
   view: 0
 }
 
@@ -39,6 +40,7 @@ const generateSceneDefaults = () => {
   state.renderer.setSize(window.innerWidth * .9, window.innerHeight * .9);
   document.body.appendChild(state.renderer.domElement);
   createLights();
+  createMaterials();
 
   state.loader = new THREE.FontLoader();
 
@@ -69,6 +71,13 @@ const switchView = () => {
     setViewForText();
   }
   createLights();
+}
+
+const createMaterials = () => {
+  state.materials = [
+    new THREE.MeshPhongMaterial({ color: 0xffffff, flatShading: true }), // front
+    new THREE.MeshPhongMaterial({ color: 0xffffff }) // side
+  ];
 }
 
 const createLights = () => {
@@ -127,34 +136,113 @@ const setViewForLines = () => {
   state.camera.lookAt(new THREE.Vector3(0, 0, 0));
 }
 
-
-const createText = (text) => {
-  let textGeo;
-  state.loader.load('../fonts/helvetiker_regular.typeface.json', function (font) {
-
-    textGeo = new THREE.TextGeometry(`${text}`, {
-      font: font,
-      size: 80,
-      height: 5,
-      curveSegments: 12,
-      bevelEnabled: true,
-      bevelThickness: 10,
-      bevelSize: 8,
-      bevelSegments: 5
-    });
+const loadFont = async (fontName, fontWeight) => {
+  const fontString = '../fonts/' + fontName + '_' + fontWeight + '.typeface.json'
+  console.log("FONT STRING", fontString);
+  await state.loader.load(fontString, function (response) {
+    console.log("LOADER RESPONSE ", response);
+    state.font = response;
+    // refreshText();
   });
-  console.log("created text geometry", textGeo);
-  return textGeo;
 }
 
-const setViewForText = (text) => {
+
+
+const createText = (text, textData) => {
+  let textGeo = new THREE.TextGeometry(text, textData);
+  const hover = 30;
+
+
+  textGeo.computeBoundingBox();
+
+  textGeo.computeVertexNormals();
+
+  // "fix" side normals by removing z-component of normals for side faces
+
+  // (this doesn't work well for beveled geometry as then we lose nice curvature around z-axis)
+
+  if (!textData.bevelEnabled) {
+    var triangleAreaHeuristics = 0.1 * (height * size);
+    for (var i = 0; i < textGeo.faces.length; i++) {
+      var face = textGeo.faces[i];
+      if (face.materialIndex == 1) {
+        for (var j = 0; j < face.vertexNormals.length; j++) {
+          face.vertexNormals[j].z = 0;
+          face.vertexNormals[j].normalize();
+        }
+        var va = textGeo.vertices[face.a];
+        var vb = textGeo.vertices[face.b];
+        var vc = textGeo.vertices[face.c];
+        var s = THREE.GeometryUtils.triangleArea(va, vb, vc);
+        if (s > triangleAreaHeuristics) {
+          for (var j = 0; j < face.vertexNormals.length; j++) {
+            face.vertexNormals[j].copy(face.normal);
+          }
+        }
+      }
+    }
+  }
+  var centerOffset = -0.5 * (textGeo.boundingBox.max.x - textGeo.boundingBox.min.x);
+  let textMesh1 = new THREE.Mesh(textGeo, state.materials);
+  textMesh1.position.x = centerOffset;
+  textMesh1.position.y = hover;
+  textMesh1.position.z = 0;
+  textMesh1.rotation.x = 0;
+  textMesh1.rotation.y = Math.PI * 2;
+
+  return textMesh1;
+
+  if (mirror) {
+    let textMesh2 = new THREE.Mesh(textGeo, state.materials);
+    textMesh2.position.x = centerOffset;
+    textMesh2.position.y = -hover;
+    textMesh2.position.z = height;
+    textMesh2.rotation.x = Math.PI;
+    textMesh2.rotation.y = Math.PI * 2;
+    return textMesh2;
+  }
+}
+
+
+
+// const createText = (text) => {
+//   let textGeo;
+//   state.loader.load('../fonts/helvetiker_regular.typeface.json', function (font) {
+
+//     textGeo = new THREE.TextGeometry(`${text}`, {
+//       font: font,
+//       size: 80,
+//       height: 5,
+//       curveSegments: 12,
+//       bevelEnabled: true,
+//       bevelThickness: 10,
+//       bevelSize: 8,
+//       bevelSegments: 5
+//     });
+//   });
+//   console.log("created text geometry", textGeo);
+//   return textGeo;
+// }
+
+const setViewForText = async (text) => {
   console.log("TITLE OBJECT", state.title);
   state.scene = new THREE.Scene();
   state.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-  state.title = createText(text);
+  await loadFont('helvetiker', 'bold');
+  const textData = {
+    font: state.font,
+    size: 80,
+    height: 5,
+    curveSegments: 12,
+    bevelThickness: 10,
+    bevelSize: 8,
+    bevelEnabled: true,
+    material: 0,
+    extrudeMaterial: 1
+  }
+  state.title = createText(text, textData);
   state.scene.add(state.title);
   state.camera.position.z = 5;
-
 }
 
 //SPINNING CUBE 
