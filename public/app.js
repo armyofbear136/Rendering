@@ -33,7 +33,6 @@ const init = () => {
 const generateSceneDefaults = () => {
 
   state.scene = new THREE.Scene();
-  console.log(state);
   state.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
   state.renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -130,9 +129,10 @@ const setViewForLines = () => {
 
 
 const createText = (text) => {
-  return state.loader.load('../fonts/helvetiker_regular.typeface.json', function (font) {
+  let textGeo;
+  state.loader.load('../fonts/helvetiker_regular.typeface.json', function (font) {
 
-    return new THREE.TextGeometry(`${text}`, {
+    textGeo = new THREE.TextGeometry(`${text}`, {
       font: font,
       size: 80,
       height: 5,
@@ -143,9 +143,12 @@ const createText = (text) => {
       bevelSegments: 5
     });
   });
+  console.log("created text geometry", textGeo);
+  return textGeo;
 }
 
 const setViewForText = (text) => {
+  console.log("TITLE OBJECT", state.title);
   state.scene = new THREE.Scene();
   state.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
   state.title = createText(text);
