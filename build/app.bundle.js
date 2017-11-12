@@ -4055,26 +4055,58 @@ var init = function init() {
   animate();
 };
 
-var generateView = function generateView() {
+var generateView = function () {
+  var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
+    return regeneratorRuntime.wrap(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
 
-  state.scene = createScene();
-  state.renderer = createRenderer(.9, .9, true);
-  state.camera = createPCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            state.scene = createScene();
+            state.renderer = createRenderer(.9, .9, true);
+            state.camera = createPCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            state.loader = new THREE.FontLoader();
+            _context.t0 = console;
+            _context.next = 7;
+            return createFont('helvetiker', 'bold');
 
-  document.body.appendChild(state.renderer.domElement);
+          case 7:
+            _context.t1 = _context.sent;
 
-  createLights();
+            _context.t0.log.call(_context.t0, _context.t1);
 
-  state.materials = createMaterials();
+            _context.next = 11;
+            return createFont('helvetiker', 'bold');
 
-  state.loader = new THREE.FontLoader();
+          case 11:
+            state.font = _context.sent;
 
-  document.addEventListener('mousedown', switchView, false);
-  document.addEventListener('keypress', rotateCube, false);
-  document.addEventListener('touchstart', rotateCube, false);
-  document.addEventListener('touchmove', rotateCube, false);
-  document.addEventListener('keydown', rotateCube, false);
-};
+            console.log("THIS IS THE FONT", state.font);
+
+            document.body.appendChild(state.renderer.domElement);
+
+            createLights();
+
+            state.materials = createMaterials();
+
+            document.addEventListener('mousedown', switchView, false);
+            document.addEventListener('keypress', rotateCube, false);
+            document.addEventListener('touchstart', rotateCube, false);
+            document.addEventListener('touchmove', rotateCube, false);
+            document.addEventListener('keydown', rotateCube, false);
+
+          case 21:
+          case 'end':
+            return _context.stop();
+        }
+      }
+    }, _callee, undefined);
+  }));
+
+  return function generateView() {
+    return _ref.apply(this, arguments);
+  };
+}();
 
 var rotateCube = function rotateCube() {
   state.cube.rotation.x += 0.1;
@@ -4166,69 +4198,25 @@ var setViewForLines = function setViewForLines() {
   state.camera.lookAt(new THREE.Vector3(0, 0, 0));
 };
 
-var loadFont = function () {
-  var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(fontName, fontWeight) {
+var createFont = function () {
+  var _ref2 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2(fontName, fontWeight) {
     var fontString;
-    return regeneratorRuntime.wrap(function _callee$(_context) {
-      while (1) {
-        switch (_context.prev = _context.next) {
-          case 0:
-            fontString = '../fonts/' + fontName + '_' + fontWeight + '.typeface.json';
-
-            console.log("FONT STRING", fontString);
-            _context.next = 4;
-            return state.loader.load(fontString, function (response) {
-              console.log("LOADER RESPONSE ", response);
-              state.font = response;
-              // refreshText();
-            });
-
-          case 4:
-          case 'end':
-            return _context.stop();
-        }
-      }
-    }, _callee, undefined);
-  }));
-
-  return function loadFont(_x, _x2) {
-    return _ref.apply(this, arguments);
-  };
-}();
-
-var setViewForText = function () {
-  var _ref2 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2(text) {
-    var font, textData;
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
-            console.log("TITLE OBJECT", state.title);
-            state.scene = createScene();
+            fontString = '../fonts/' + fontName + '_' + fontWeight + '.typeface.json';
+
+            console.log("FONT STRING", fontString);
             _context2.next = 4;
-            return loadFont('helvetiker', 'bold');
+            return state.loader.load(fontString, function (response) {
+              console.log("LOADER RESPONSE ", response);
+              state.font = response;
+              //return response;
+              // refreshText();
+            });
 
           case 4:
-            font = _context2.sent;
-            textData = {
-              font: font,
-              size: 80,
-              height: 5,
-              curveSegments: 12,
-              bevelThickness: 10,
-              bevelSize: 8,
-              bevelEnabled: true,
-              material: 0,
-              extrudeMaterial: 1
-            };
-
-
-            state.title = createText(text, textData);
-            state.camera = createPCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            state.scene.add(state.title);
-            state.camera.position.z = 5;
-
-          case 10:
           case 'end':
             return _context2.stop();
         }
@@ -4236,10 +4224,32 @@ var setViewForText = function () {
     }, _callee2, undefined);
   }));
 
-  return function setViewForText(_x3) {
+  return function createFont(_x, _x2) {
     return _ref2.apply(this, arguments);
   };
 }();
+
+var setViewForText = function setViewForText(text) {
+  console.log("TITLE OBJECT: ", state.title, "FONT OBJECT: ", state.font);
+  state.scene = createScene();
+
+  var textData = {
+    font: state.font,
+    size: 80,
+    height: 5,
+    curveSegments: 12,
+    bevelThickness: 10,
+    bevelSize: 8,
+    bevelEnabled: true,
+    material: 0,
+    extrudeMaterial: 1
+  };
+
+  state.title = createText(text, textData);
+  state.camera = createPCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+  state.scene.add(state.title);
+  state.camera.position.z = 5;
+};
 
 var createText = function createText(text, textData) {
   var textGeo = new THREE.TextGeometry(text, textData);

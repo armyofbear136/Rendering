@@ -31,19 +31,27 @@ const init = () => {
 
 }
 
-const generateView = () => {
+const generateView = async () => {
 
   state.scene = createScene();
   state.renderer = createRenderer(.9, .9, true);
   state.camera = createPCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+  state.loader = new THREE.FontLoader();
+  console.log(await createFont('helvetiker', 'bold'));
+  state.font = await createFont('helvetiker', 'bold');
+  console.log("THIS IS THE FONT", state.font);
+
+
+
 
   document.body.appendChild(state.renderer.domElement);
 
   createLights();
 
+
   state.materials = createMaterials();
 
-  state.loader = new THREE.FontLoader();
+
 
   document.addEventListener('mousedown', switchView, false);
   document.addEventListener('keypress', rotateCube, false);
@@ -154,24 +162,24 @@ const setViewForLines = () => {
   state.camera.lookAt(new THREE.Vector3(0, 0, 0));
 }
 
-const loadFont = async (fontName, fontWeight) => {
+const createFont = async (fontName, fontWeight) => {
   const fontString = '../fonts/' + fontName + '_' + fontWeight + '.typeface.json'
   console.log("FONT STRING", fontString);
   await state.loader.load(fontString, function (response) {
     console.log("LOADER RESPONSE ", response);
     state.font = response;
+    //return response;
     // refreshText();
   });
 }
 
-const setViewForText = async (text) => {
-  console.log("TITLE OBJECT", state.title);
+const setViewForText = (text) => {
+  console.log("TITLE OBJECT: ", state.title, "FONT OBJECT: ", state.font);
   state.scene = createScene();
-  let font = await loadFont('helvetiker', 'bold');
-  
+
 
   const textData = {
-    font,
+    font: state.font,
     size: 80,
     height: 5,
     curveSegments: 12,
