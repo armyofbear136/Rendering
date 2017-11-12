@@ -23,7 +23,7 @@ let state = {
 }
 
 const init = () => {
-  generateSceneDefaults();
+  generateView();
 
   setViewForCube();
 
@@ -31,16 +31,17 @@ const init = () => {
 
 }
 
-const generateSceneDefaults = () => {
+const generateView = () => {
 
-  state.scene = new THREE.Scene();
-  state.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
-  state.renderer = new THREE.WebGLRenderer({ antialias: true });
-  state.renderer.setSize(window.innerWidth * .9, window.innerHeight * .9);
+  state.renderer = createRenderer(.9, .9, true);
+  state.camera = createCamera();
+
   document.body.appendChild(state.renderer.domElement);
+  
   createLights();
-  createMaterials();
+
+  state.materials = createMaterials();
 
   state.loader = new THREE.FontLoader();
 
@@ -73,8 +74,24 @@ const switchView = () => {
   createLights();
 }
 
+const createScene = () => {
+  state.scene = new THREE.Scene();
+}
+
+const createCamera = () => {
+  return new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+}
+
+
+
+const createRenderer = (width, height, aa) => {
+  let renderer = new THREE.WebGLRenderer({ antialias: aa });
+  renderer.setSize(window.innerWidth * width, window.innerHeight * height);
+  return renderer;
+}
+
 const createMaterials = () => {
-  state.materials = [
+  return [
     new THREE.MeshPhongMaterial({ color: 0xffffff, flatShading: true }), // front
     new THREE.MeshPhongMaterial({ color: 0xffffff }) // side
   ];
