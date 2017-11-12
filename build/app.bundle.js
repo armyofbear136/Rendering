@@ -4048,23 +4048,24 @@ var state = {
 };
 
 var init = function init() {
-  generateSceneDefaults();
+  generateView();
 
   setViewForCube();
 
   animate();
 };
 
-var generateSceneDefaults = function generateSceneDefaults() {
+var generateView = function generateView() {
 
-  state.scene = new THREE.Scene();
-  state.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+  state.scene = createScene();
+  state.renderer = createRenderer(.9, .9, true);
+  state.camera = createPCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
-  state.renderer = new THREE.WebGLRenderer({ antialias: true });
-  state.renderer.setSize(window.innerWidth * .9, window.innerHeight * .9);
   document.body.appendChild(state.renderer.domElement);
+
   createLights();
-  createMaterials();
+
+  state.materials = createMaterials();
 
   state.loader = new THREE.FontLoader();
 
@@ -4078,6 +4079,7 @@ var generateSceneDefaults = function generateSceneDefaults() {
 var rotateCube = function rotateCube() {
   state.cube.rotation.x += 0.1;
   state.cube.rotation.y += 0.1;
+  state.camera.position.z++;
 };
 
 var switchView = function switchView() {
@@ -4093,8 +4095,22 @@ var switchView = function switchView() {
   createLights();
 };
 
+var createScene = function createScene() {
+  return new THREE.Scene();
+};
+
+var createPCamera = function createPCamera(fov, aspect, near, fat) {
+  return new THREE.PerspectiveCamera(fov, aspect, near, fat);
+};
+
+var createRenderer = function createRenderer(width, height, aa) {
+  var renderer = new THREE.WebGLRenderer({ antialias: aa });
+  renderer.setSize(window.innerWidth * width, window.innerHeight * height);
+  return renderer;
+};
+
 var createMaterials = function createMaterials() {
-  state.materials = [new THREE.MeshPhongMaterial({ color: 0xffffff, flatShading: true }), // front
+  return [new THREE.MeshPhongMaterial({ color: 0xffffff, flatShading: true }), // front
   new THREE.MeshPhongMaterial({ color: 0xffffff }) // side
   ];
 };
@@ -4140,12 +4156,12 @@ var createLines = function createLines() {
 };
 
 var setViewForLines = function setViewForLines() {
-  state.scene = new THREE.Scene();
+  state.scene = createScene();
 
   state.lines = createLines();
   state.scene.add(state.lines);
 
-  state.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 500);
+  state.camera = createPCamera(45, window.innerWidth / window.innerHeight, 1, 500);
   state.camera.position.set(0, 0, 100);
   state.camera.lookAt(new THREE.Vector3(0, 0, 0));
 };
@@ -4177,6 +4193,51 @@ var loadFont = function () {
 
   return function loadFont(_x, _x2) {
     return _ref.apply(this, arguments);
+  };
+}();
+
+var setViewForText = function () {
+  var _ref2 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2(text) {
+    var font, textData;
+    return regeneratorRuntime.wrap(function _callee2$(_context2) {
+      while (1) {
+        switch (_context2.prev = _context2.next) {
+          case 0:
+            console.log("TITLE OBJECT", state.title);
+            state.scene = createScene();
+            _context2.next = 4;
+            return loadFont('helvetiker', 'bold');
+
+          case 4:
+            font = _context2.sent;
+            textData = {
+              font: font,
+              size: 80,
+              height: 5,
+              curveSegments: 12,
+              bevelThickness: 10,
+              bevelSize: 8,
+              bevelEnabled: true,
+              material: 0,
+              extrudeMaterial: 1
+            };
+
+
+            state.title = createText(text, textData);
+            state.camera = createPCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            state.scene.add(state.title);
+            state.camera.position.z = 5;
+
+          case 10:
+          case 'end':
+            return _context2.stop();
+        }
+      }
+    }, _callee2, undefined);
+  }));
+
+  return function setViewForText(_x3) {
+    return _ref2.apply(this, arguments);
   };
 }();
 
@@ -4253,48 +4314,6 @@ var createText = function createText(text, textData) {
 //   return textGeo;
 // }
 
-var setViewForText = function () {
-  var _ref2 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2(text) {
-    var textData;
-    return regeneratorRuntime.wrap(function _callee2$(_context2) {
-      while (1) {
-        switch (_context2.prev = _context2.next) {
-          case 0:
-            console.log("TITLE OBJECT", state.title);
-            state.scene = new THREE.Scene();
-            state.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            _context2.next = 5;
-            return loadFont('helvetiker', 'bold');
-
-          case 5:
-            textData = {
-              font: state.font,
-              size: 80,
-              height: 5,
-              curveSegments: 12,
-              bevelThickness: 10,
-              bevelSize: 8,
-              bevelEnabled: true,
-              material: 0,
-              extrudeMaterial: 1
-            };
-
-            state.title = createText(text, textData);
-            state.scene.add(state.title);
-            state.camera.position.z = 5;
-
-          case 9:
-          case 'end':
-            return _context2.stop();
-        }
-      }
-    }, _callee2, undefined);
-  }));
-
-  return function setViewForText(_x3) {
-    return _ref2.apply(this, arguments);
-  };
-}();
 
 //SPINNING CUBE 
 

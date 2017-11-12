@@ -33,12 +33,12 @@ const init = () => {
 
 const generateView = () => {
 
-
+  state.scene = createScene();
   state.renderer = createRenderer(.9, .9, true);
-  state.camera = createCamera();
+  state.camera = createPCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
   document.body.appendChild(state.renderer.domElement);
-  
+
   createLights();
 
   state.materials = createMaterials();
@@ -57,6 +57,7 @@ const generateView = () => {
 const rotateCube = () => {
   state.cube.rotation.x += 0.1;
   state.cube.rotation.y += 0.1;
+  state.camera.position.z++;
 }
 
 const switchView = () => {
@@ -75,11 +76,11 @@ const switchView = () => {
 }
 
 const createScene = () => {
-  state.scene = new THREE.Scene();
+  return new THREE.Scene();
 }
 
-const createCamera = () => {
-  return new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const createPCamera = (fov, aspect, near, fat) => {
+  return new THREE.PerspectiveCamera(fov, aspect, near, fat);
 }
 
 
@@ -143,12 +144,12 @@ const createLines = () => {
 }
 
 const setViewForLines = () => {
-  state.scene = new THREE.Scene();
+  state.scene = createScene();
 
   state.lines = createLines();
   state.scene.add(state.lines);
 
-  state.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 500);
+  state.camera = createPCamera(45, window.innerWidth / window.innerHeight, 1, 500);
   state.camera.position.set(0, 0, 100);
   state.camera.lookAt(new THREE.Vector3(0, 0, 0));
 }
@@ -163,6 +164,29 @@ const loadFont = async (fontName, fontWeight) => {
   });
 }
 
+const setViewForText = async (text) => {
+  console.log("TITLE OBJECT", state.title);
+  state.scene = createScene();
+  let font = await loadFont('helvetiker', 'bold');
+  
+
+  const textData = {
+    font,
+    size: 80,
+    height: 5,
+    curveSegments: 12,
+    bevelThickness: 10,
+    bevelSize: 8,
+    bevelEnabled: true,
+    material: 0,
+    extrudeMaterial: 1
+  }
+
+  state.title = createText(text, textData);
+  state.camera = createPCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+  state.scene.add(state.title);
+  state.camera.position.z = 5;
+}
 
 
 const createText = (text, textData) => {
@@ -241,26 +265,6 @@ const createText = (text, textData) => {
 //   return textGeo;
 // }
 
-const setViewForText = async (text) => {
-  console.log("TITLE OBJECT", state.title);
-  state.scene = new THREE.Scene();
-  state.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-  await loadFont('helvetiker', 'bold');
-  const textData = {
-    font: state.font,
-    size: 80,
-    height: 5,
-    curveSegments: 12,
-    bevelThickness: 10,
-    bevelSize: 8,
-    bevelEnabled: true,
-    material: 0,
-    extrudeMaterial: 1
-  }
-  state.title = createText(text, textData);
-  state.scene.add(state.title);
-  state.camera.position.z = 5;
-}
 
 //SPINNING CUBE 
 
